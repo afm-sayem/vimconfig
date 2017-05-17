@@ -3,22 +3,23 @@ set nocompatible
 call plug#begin('~/.config/nvim/plugged')
 
 Plug 'IN3D/vim-raml'
-Plug 'Shougo/vimproc.vim'
 Plug 'Shougo/deoplete.nvim'
-Plug 'heavenshell/vim-jsdoc'
+Plug 'Shougo/vimproc.vim'
 Plug 'SirVer/ultisnips'
 Plug 'airblade/vim-gitgutter'
 Plug 'bling/vim-airline'
 Plug 'einars/js-beautify'
-Plug 'ervandew/supertab'
 Plug 'flazz/vim-colorschemes'
+Plug 'gcorne/vim-sass-lint'
+Plug 'heavenshell/vim-jsdoc'
 Plug 'honza/vim-snippets'
 Plug 'jeetsukumaran/vim-buffergator'
 Plug 'kien/ctrlp.vim'
 Plug 'leafgarland/typescript-vim'
 Plug 'moll/vim-node'
+Plug 'pangloss/vim-javascript'
 Plug 'rking/ag.vim'
-Plug 'scrooloose/syntastic'
+Plug 'neomake/neomake'
 Plug 'tomtom/tcomment_vim'
 Plug 'tpope/vim-fugitive'
 Plug 'tpope/vim-surround'
@@ -65,7 +66,7 @@ set colorcolumn=100
 set autoread
 
 " share clipboard with system
-set clipboard=unnamedplus
+set clipboard+=unnamedplus
 " set up column guide
 " highlight colorcolumn ctermbg=3
 " set colorcolumn=80
@@ -93,7 +94,7 @@ nnoremap <Leader>x :bd<CR>
 nnoremap <Leader>e :Lexplore<CR>
 
 "surround with quotes
-nnoremap <Leader>q ciw""<Esc>P
+nnoremap <Leader>q ciw''<Esc>P
 
 " Easier command mode
 nnoremap ; :
@@ -106,6 +107,9 @@ nnoremap ; :
 " CtrlP
 " ------------------------
 let g:ctrlp_use_caching = 0
+
+" Deoplete
+let g:deoplete#enable_at_startup = 1
 
 " A better search for ctrlp
 if executable('ag')
@@ -130,58 +134,17 @@ let g:netrw_altv = 1
 " ------------------------
 let g:airline#extensions#tabline#enabled = 1 "show tabs
 
-" YouCompleteMe
-" ------------------------
-
-" http://stackoverflow.com/questions/14896327/ultisnips-and-youcompleteme
-" make YCM compatible with UltiSnips (using supertab)
-let g:ycm_key_list_select_completion = ['<C-n>', '<Down>']
-let g:ycm_key_list_previous_completion = ['<C-p>', '<Up>']
-let g:SuperTabDefaultCompletionType = '<C-n>'
-
-" better key bindings for UltiSnipsExpandTrigger
 let g:UltiSnipsExpandTrigger = "<tab>"
 let g:UltiSnipsJumpForwardTrigger = "<tab>"
 let g:UltiSnipsJumpBackwardTrigger = "<s-tab>"
-" youcompleteme error
-let g:ycm_cache_omnifunc = 0
 
-" Syntastic
-" ------------------------
-set statusline+=%#warningmsg#
-set statusline+=%{SyntasticStatuslineFlag()}
-set statusline+=%*
+if executable('flow')
+  let g:neomake_javascript_enabled_makers = ['eslint', 'flow']
+else
+  let g:neomake_javascript_enabled_makers = ['eslint']
+endif
 
-" let g:syntastic_javascript_eslint_exec = '/home/kishan/.nvm/versions/node/v6.2.1/bin/eslint'
-function! SyntasticESlintChecker()
-  let l:npm_bin = ''
-  let l:eslint = 'eslint'
-
-  if executable('npm')
-      let l:npm_bin = split(system('npm bin'), '\n')[0]
-  endif
-
-  if strlen(l:npm_bin) && executable(l:npm_bin . '/eslint')
-    let l:eslint = l:npm_bin . '/eslint'
-  endif
-
-  let b:syntastic_javascript_eslint_exec = l:eslint
-endfunction
-
-
-let g:syntastic_javascript_checkers = ["eslint"]
-
-autocmd FileType javascript :call SyntasticESlintChecker()
-let g:syntastic_javascript_checkers = ['eslint']
-" let g:syntastic_always_populate_loc_list = 1
-" let g:syntastic_auto_loc_list = 1
-let g:syntastic_check_on_open = 1
-let g:syntastic_check_on_wq = 0
-" close scratch when a selection is made
+" Static code analysis
+autocmd! BufWritePost * Neomake
 autocmd CompleteDone * pclose
-
-" Matchit
-" ------------------------
-" activate default matchit plugin for html tag nav
-runtime macros/matchit.vim
 
